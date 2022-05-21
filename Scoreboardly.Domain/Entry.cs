@@ -1,6 +1,6 @@
-
-using System;
 using Newtonsoft.Json;
+
+namespace Scoreboardly.Domain;
 
 /// <summary>
 /// Defines a value object that represents an entry on the scoreboard.

@@ -1,11 +1,10 @@
-
-using System;
-using System.Linq;
-using System.Collections.Generic;
 using Newtonsoft.Json;
 
-namespace Scoreboardly;
+namespace Scoreboardly.Domain;
 
+/// <summary>
+/// Defines the scoreboard aggregate root.
+/// </summary>
 public class Scoreboard
 {
     [JsonProperty("scores")]
