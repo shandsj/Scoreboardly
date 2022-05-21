@@ -1,0 +1,11 @@
+{
+  "body": {
+    "content": "ewogICJwbGF5ZXJOYW1lIjoiSmFzb24iLAogICJzY29yZSI6IjEwMDAiCn0=",
+    "file": false,
+    "fileSize": false
+  },
+  "headers": {},
+  "method": "PUT",
+  "title": "Put a New Score",
+  "url": "http://localhost:7071/api/scoreboards/b8f4e5bb-e5e3-43ad-b35a-456ecaeb80f5"
+}

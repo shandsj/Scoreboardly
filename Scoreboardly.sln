@@ -1,0 +1,28 @@
+﻿
+Microsoft Visual Studio Solution File, Format Version 12.00
+# Visual Studio Version 16
+VisualStudioVersion = 16.0.30114.105
+MinimumVisualStudioVersion = 10.0.40219.1
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Scoreboardly.Application.Functions", "Scoreboardly.Application.Functions\Scoreboardly.Application.Functions.csproj", "{3128313A-D9E4-4CAD-BCFC-46671967D093}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Scoreboardly.Domain", "Scoreboardly.Domain\Scoreboardly.Domain.csproj", "{97DDC107-36DB-49C4-B0BE-3C85CD53201F}"
+EndProject
+Global
+	GlobalSection(SolutionConfigurationPlatforms) = preSolution
+		Debug|Any CPU = Debug|Any CPU
+		Release|Any CPU = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(SolutionProperties) = preSolution
+		HideSolutionNode = FALSE
+	EndGlobalSection
+	GlobalSection(ProjectConfigurationPlatforms) = postSolution
+		{3128313A-D9E4-4CAD-BCFC-46671967D093}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{3128313A-D9E4-4CAD-BCFC-46671967D093}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{3128313A-D9E4-4CAD-BCFC-46671967D093}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{3128313A-D9E4-4CAD-BCFC-46671967D093}.Release|Any CPU.Build.0 = Release|Any CPU
+		{97DDC107-36DB-49C4-B0BE-3C85CD53201F}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{97DDC107-36DB-49C4-B0BE-3C85CD53201F}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{97DDC107-36DB-49C4-B0BE-3C85CD53201F}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{97DDC107-36DB-49C4-B0BE-3C85CD53201F}.Release|Any CPU.Build.0 = Release|Any CPU
+	EndGlobalSection
+EndGlobal
