@@ -1,0 +1,11 @@
+{
+  "body": {
+    "content": "ewogICJpZCI6ImI4ZjRlNWJiLWU1ZTMtNDNhZC1iMzVhLTQ1NmVjYWViODBmNSIsCiAgIm5hbWUiOiJTbmFrZSIsCiAgIm1heGltdW1TY29yZXMiOiIxMCIKfQ==",
+    "file": false,
+    "fileSize": false
+  },
+  "headers": {},
+  "method": "POST",
+  "title": "Create Scoreboard",
+  "url": "http://localhost:7071/api/scoreboards"
+}

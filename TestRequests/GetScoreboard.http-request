@@ -1,0 +1,11 @@
+{
+  "body": {
+    "content": "",
+    "file": false,
+    "fileSize": false
+  },
+  "headers": {},
+  "method": "GET",
+  "title": "Get Scoreboard",
+  "url": "http://localhost:7071/api/scoreboards/b8f4e5bb-e5e3-43ad-b35a-456ecaeb80f5"
+}
