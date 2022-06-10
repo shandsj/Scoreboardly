@@ -19,6 +19,7 @@ public class ScoreboardFactory : IScoreboardFactory
         };
     }
 
+    /// <inheritdoc />
     public ScoreboardDto CreateScoreboardDto(Scoreboard source)
     {
         return new ScoreboardDto()
@@ -30,6 +31,7 @@ public class ScoreboardFactory : IScoreboardFactory
         };
     }
 
+    /// <inheritdoc />
     public EntryDto CreateEntryDto(Entry source)
     {
         return new EntryDto()

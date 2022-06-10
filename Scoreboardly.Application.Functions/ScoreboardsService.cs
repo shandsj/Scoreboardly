@@ -14,9 +14,15 @@ using Scoreboardly.Application.Functions.Api;
 
 namespace Scoreboardly.Application.Functions
 {
+    /// <summary>
+    /// Contains the scoreboard related endpoints.
+    /// </summary>
     public static class ScoreboardsService
     {
-
+        /// <summary>
+        /// Handles the GET /api/scoreboards endpoint.
+        /// </summary>
+        /// <returns>The result.</returns>
         [FunctionName("GetAllScoreboards")]
         public static IActionResult GetAllScoreboards(
             [HttpTrigger(AuthorizationLevel.Anonymous, "get",
@@ -42,9 +48,11 @@ namespace Scoreboardly.Application.Functions
                 return new OkObjectResult(JsonConvert.SerializeObject(scoreboardDtos));
             }
         }
-
         
-
+        /// <summary>
+        /// Handles the POST /api/scoreboards endpoint.
+        /// </summary>
+        /// <returns>The result.</returns>
         [FunctionName("CreateScoreboard")]
         public static async Task<IActionResult> CreateScoreboardAsync(
             [HttpTrigger(
@@ -78,6 +86,10 @@ namespace Scoreboardly.Application.Functions
             return new OkResult();
         }
 
+        /// <summary>
+        /// Handles the GET /api/scoreboards/{id} endpoint.
+        /// </summary>
+        /// <returns>The result.</returns>
         [FunctionName("GetScoreboardById")]
         public static IActionResult GetScoreboardById(
             [HttpTrigger(
@@ -106,9 +118,11 @@ namespace Scoreboardly.Application.Functions
                 return new OkObjectResult(JsonConvert.SerializeObject(scoreboardDto));
             }
         }
-
         
-
+        /// <summary>
+        /// Handles the PUT /api/scoreboards/{id} endpoint.
+        /// </summary>
+        /// <returns>The result.</returns>
         [FunctionName("PutNewScoreEntry")]
         public static async Task<IActionResult> PutNewScoreEntryAsync(
             [HttpTrigger(
