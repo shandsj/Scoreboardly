@@ -2,6 +2,7 @@
   "name": "scoreboardly",
   "version": "0.1.0",
   "private": true,
+  "type": "module",
   "description": "Scoreboardly service and JavaScript SDK workspace",
   "workspaces": [
     "packages/scoreboardly-sdk",

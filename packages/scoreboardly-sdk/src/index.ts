@@ -190,7 +190,7 @@ export function createScoreboardly(options: ScoreboardlyOptions): ScoreboardlyCl
   return {
     async getLeaderboard(): Promise<Scoreboard> {
       const response = await send("");
-      return parseScoreboard(await response.text());
+      return parseScoreboard(parseJson(await response.text()));
     },
 
     async submitScore(submission: ScoreSubmission): Promise<void> {

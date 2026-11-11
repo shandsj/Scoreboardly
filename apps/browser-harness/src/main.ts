@@ -11,6 +11,7 @@ const boardId = "harness-board";
 async function getMockToken(): Promise<string | null> {
   const response = await fetch("/__mock/token", { method: "POST" });
   if (!response.ok) {
+    addActivity(`POST token exchange · HTTP ${response.status}`, "error");
     throw new ScoreboardlyError(
       "http",
       `Mock token endpoint failed with HTTP ${response.status}.`,
@@ -19,6 +20,10 @@ async function getMockToken(): Promise<string | null> {
   }
 
   const result = await response.json() as { accessToken?: string | null };
+  addActivity(
+    result.accessToken ? "POST token exchange · token supplied" : "POST token exchange · no token supplied",
+    result.accessToken ? "success" : "error"
+  );
   return result.accessToken ?? null;
 }
 

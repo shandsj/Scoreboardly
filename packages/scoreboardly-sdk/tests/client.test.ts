@@ -9,6 +9,12 @@ import {
 
 const API_URL = "https://scoreboardly.test/api";
 const BOARD_ID = "test-board";
+const expectedBoard = {
+  id: BOARD_ID,
+  name: "Test Board",
+  maximumScores: 3,
+  scores: [{ playerName: "Ada", score: 900 }]
+};
 
 function createClient(auth: AuthProvider = {
   getAccessToken: async () => "test-scoped-token"
@@ -24,12 +30,20 @@ describe("Scoreboardly SDK foundation", () => {
   it("reads a public leaderboard through the configured API", async () => {
     const client = createClient();
 
-    await expect(client.getLeaderboard()).resolves.toEqual({
-      id: BOARD_ID,
-      name: "Test Board",
-      maximumScores: 3,
-      scores: [{ playerName: "Ada", score: 900 }]
-    });
+    await expect(client.getLeaderboard()).resolves.toEqual(expectedBoard);
+  });
+
+  it("supports the legacy JSON-string envelope returned by the current .NET API", async () => {
+    server.use(
+      http.get(`${API_URL}/scoreboards/:boardId`, () =>
+        new HttpResponse(JSON.stringify(JSON.stringify(expectedBoard)), {
+          status: 200,
+          headers: { "Content-Type": "application/json" }
+        })
+      )
+    );
+
+    await expect(createClient().getLeaderboard()).resolves.toEqual(expectedBoard);
   });
 
   it("attaches the short-lived bearer token to score submissions", async () => {
