@@ -8,6 +8,8 @@ import "./style.css";
 
 const boardId = "harness-board";
 
+/** Requests fixed test credentials from the local mock API, never from production. */
+
 async function getMockToken(): Promise<string | null> {
   const response = await fetch("/__mock/token", { method: "POST" });
   if (!response.ok) {
@@ -33,6 +35,7 @@ const client: ScoreboardlyClient = createScoreboardly({
   auth: { getAccessToken: getMockToken }
 });
 
+/** Resolves a required harness element and fails early if the HTML contract drifts. */
 const byId = <T extends HTMLElement>(id: string): T => {
   const element = document.getElementById(id);
   if (!element) {
@@ -49,6 +52,7 @@ const connectionState = byId<HTMLSpanElement>("connection-state");
 const latency = byId<HTMLInputElement>("latency");
 const latencyValue = byId<HTMLOutputElement>("latency-value");
 
+/** Adds a timestamped entry to the bounded request trace shown in this tab. */
 function addActivity(message: string, tone: "normal" | "success" | "error" = "normal"): void {
   const empty = activityLog.querySelector(".log-empty");
   empty?.remove();
@@ -67,6 +71,7 @@ function addActivity(message: string, tone: "normal" | "success" | "error" = "no
   }
 }
 
+/** Renders the typed board snapshot returned by the SDK. */
 function renderScores(board: Scoreboard): void {
   scoreBody.replaceChildren();
   if (board.scores.length === 0) {
@@ -95,6 +100,7 @@ function renderScores(board: Scoreboard): void {
   });
 }
 
+/** Converts SDK and unexpected errors into concise UI feedback. */
 function describeError(error: unknown): string {
   if (error instanceof ScoreboardlyError) {
     return `${error.code}: ${error.message}`;
@@ -102,6 +108,7 @@ function describeError(error: unknown): string {
   return error instanceof Error ? error.message : "An unexpected error occurred.";
 }
 
+/** Exercises the SDK read path and updates the leaderboard and connection indicators. */
 async function refreshLeaderboard(): Promise<void> {
   leaderboardStatus.textContent = "Fetching leaderboard through the SDK…";
   try {
@@ -119,6 +126,7 @@ async function refreshLeaderboard(): Promise<void> {
   }
 }
 
+/** Updates the local mock server scenario; this does not call the real Scoreboardly API. */
 async function updateScenario(): Promise<void> {
   const online = byId<HTMLSelectElement>("online").value === "online";
   const authMode = byId<HTMLSelectElement>("auth-mode").value;

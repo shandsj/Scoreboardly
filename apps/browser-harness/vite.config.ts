@@ -23,6 +23,11 @@ const initialScenario: Scenario = {
   submitMode: "accept"
 };
 
+/**
+ * Adds deterministic in-memory API endpoints to the Vite development server.
+ * State is process-local and reset by the harness or server restart. This
+ * plugin is development-only and is not part of the production service.
+ */
 function mockScoreboardApi(): Plugin {
   let scenario: Scenario = { ...initialScenario };
   let scores: Entry[] = [
@@ -31,6 +36,7 @@ function mockScoreboardApi(): Plugin {
     { playerName: "Avalanche", score: 6750 }
   ];
 
+  /** Writes JSON with no-store caching so scenario changes are immediately visible. */
   const sendJson = (response: ServerResponse, status: number, payload: unknown): void => {
     response.statusCode = status;
     response.setHeader("Content-Type", "application/json; charset=utf-8");
@@ -38,6 +44,7 @@ function mockScoreboardApi(): Plugin {
     response.end(JSON.stringify(payload));
   };
 
+  /** Reads and parses a JSON request body for the local control and score endpoints. */
   const readBody = async (request: IncomingMessage): Promise<unknown> => {
     const chunks: Buffer[] = [];
     for await (const chunk of request) {
@@ -47,6 +54,7 @@ function mockScoreboardApi(): Plugin {
     return raw.length > 0 ? JSON.parse(raw) as unknown : {};
   };
 
+  /** Applies the configured delay to simulated API and token operations. */
   const pause = async (): Promise<void> => {
     if (scenario.latencyMs > 0) {
       await new Promise((resolve) => setTimeout(resolve, scenario.latencyMs));

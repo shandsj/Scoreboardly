@@ -59,6 +59,11 @@ npm run typecheck
 npm run build
 ```
 
+### SDK documentation
+
+- [SDK package README](packages/scoreboardly-sdk/README.md): installation, quick start, public API, authentication, and error handling.
+- [SDK and harness guide](Docs/JavaScript-SDK.md): architecture, request flow, mock scenarios, testing, and planned work.
+
 ### Run the browser harness
 
 ```bash
