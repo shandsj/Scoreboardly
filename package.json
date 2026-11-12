@@ -1,0 +1,28 @@
+{
+  "name": "scoreboardly",
+  "version": "0.1.0",
+  "private": true,
+  "type": "module",
+  "description": "Scoreboardly service and JavaScript SDK workspace",
+  "workspaces": [
+    "packages/scoreboardly-sdk",
+    "apps/browser-harness"
+  ],
+  "engines": {
+    "node": ">=22.12.0"
+  },
+  "scripts": {
+    "dev:harness": "npm run dev --workspace @scoreboardly/browser-harness",
+    "test": "vitest run",
+    "test:watch": "vitest",
+    "typecheck": "npm run typecheck --workspace @scoreboardly/sdk && npm run typecheck --workspace @scoreboardly/browser-harness",
+    "build": "npm run build --workspace @scoreboardly/sdk && npm run build --workspace @scoreboardly/browser-harness"
+  },
+  "devDependencies": {
+    "@types/node": "22.20.5",
+    "msw": "3.0.4",
+    "typescript": "7.0.2",
+    "vite": "8.3.8",
+    "vitest": "5.1.0"
+  }
+}

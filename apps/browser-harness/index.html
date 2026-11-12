@@ -1,0 +1,144 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta name="theme-color" content="#111820" />
+    <title>Scoreboardly SDK Harness</title>
+  </head>
+  <body>
+    <div class="shell">
+      <header class="topbar">
+        <div>
+          <p class="eyebrow">DEVELOPER WORKBENCH</p>
+          <h1>Scoreboardly <span>SDK harness</span></h1>
+        </div>
+        <span class="environment"><span class="pulse"></span> MOCK ENVIRONMENT</span>
+      </header>
+
+      <main>
+        <section class="intro">
+          <div>
+            <h2>Exercise the client, not a simulation of the client.</h2>
+            <p>This harness uses the SDK package and a local mock API. Nothing here submits data to a real Scoreboardly board.</p>
+          </div>
+          <button id="reset" class="button button-secondary" type="button">Reset scenario</button>
+        </section>
+
+        <section class="grid">
+          <aside class="panel controls">
+            <div class="panel-heading">
+              <div>
+                <p class="eyebrow">SCENARIO CONTROLS</p>
+                <h2>Change conditions</h2>
+              </div>
+              <span class="tag">LOCAL ONLY</span>
+            </div>
+
+            <label class="field">
+              <span>API availability</span>
+              <select id="online">
+                <option value="online">Online</option>
+                <option value="offline">Unavailable</option>
+              </select>
+            </label>
+
+            <label class="field">
+              <span>Simulated latency <output id="latency-value">0 ms</output></span>
+              <input id="latency" type="range" min="0" max="2500" step="100" value="0" />
+            </label>
+
+            <label class="field">
+              <span>Token scenario</span>
+              <select id="auth-mode">
+                <option value="valid">Valid scoped token</option>
+                <option value="missing">No token returned</option>
+                <option value="expired">Expired token</option>
+                <option value="wrong-board">Token for another board</option>
+                <option value="insufficient-scope">Token without submit permission</option>
+              </select>
+              <small>Mock token exchange only. Real credentials are not used in this harness.</small>
+            </label>
+
+            <label class="field">
+              <span>Submission response</span>
+              <select id="submit-mode">
+                <option value="accept">Accept score</option>
+                <option value="conflict">Reject as non-qualifying (409)</option>
+                <option value="server-error">Server error (500)</option>
+              </select>
+            </label>
+
+            <div class="scenario-note">
+              <strong>What this proves</strong>
+              <p>Public leaderboard reads, token-provider behavior, bearer-token authorization, and predictable API outcomes.</p>
+            </div>
+          </aside>
+
+          <section class="panel leaderboard">
+            <div class="panel-heading">
+              <div>
+                <p class="eyebrow">SDK CLIENT</p>
+                <h2>Leaderboard</h2>
+              </div>
+              <button id="refresh" class="button button-secondary" type="button">Refresh</button>
+            </div>
+            <div class="board-meta">
+              <span>Board <code>harness-board</code></span>
+              <span id="connection-state" class="status status-online">API available</span>
+            </div>
+            <div class="table-wrap">
+              <table>
+                <thead><tr><th>#</th><th>PLAYER</th><th>SCORE</th></tr></thead>
+                <tbody id="scores">
+                  <tr><td colspan="3" class="empty">Loading mock leaderboard…</td></tr>
+                </tbody>
+              </table>
+            </div>
+            <p id="leaderboard-status" class="feedback" role="status" aria-live="polite">Waiting for the first request.</p>
+          </section>
+        </section>
+
+        <section class="grid lower-grid">
+          <section class="panel submission">
+            <div class="panel-heading">
+              <div>
+                <p class="eyebrow">WRITE PATH</p>
+                <h2>Submit a score</h2>
+              </div>
+              <span class="tag">SDK METHOD</span>
+            </div>
+            <form id="score-form">
+              <label class="field">
+                <span>Player name</span>
+                <input id="player-name" name="playerName" value="Test Rider" maxlength="20" required />
+              </label>
+              <label class="field">
+                <span>Score</span>
+                <input id="score" name="score" type="number" min="0" max="999999" value="12500" required />
+              </label>
+              <button class="button button-primary" type="submit">Submit through SDK</button>
+            </form>
+            <p id="submission-status" class="feedback" role="status" aria-live="polite">No score submitted yet.</p>
+          </section>
+
+          <section class="panel activity">
+            <div class="panel-heading">
+              <div>
+                <p class="eyebrow">REQUEST TRACE</p>
+                <h2>Activity</h2>
+              </div>
+              <span class="tag">IN THIS TAB</span>
+            </div>
+            <ol id="activity-log" class="log">
+              <li class="log-empty">SDK activity will appear here.</li>
+            </ol>
+          </section>
+        </section>
+      </main>
+
+      <footer>Scoreboardly SDK · Mock API · No production credentials or scoreboards</footer>
+    </div>
+    <script type="module" src="/src/main.ts"></script>
+  </body>
+</html>

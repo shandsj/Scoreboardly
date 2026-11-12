@@ -1,0 +1,50 @@
+name: SDK workspace CI
+
+on:
+  pull_request:
+    branches: [main]
+    paths:
+      - "packages/**"
+      - "apps/browser-harness/**"
+      - "tests/**"
+      - "package.json"
+      - "vitest.config.ts"
+      - ".github/workflows/sdk-ci.yml"
+  push:
+    branches: [main]
+    paths:
+      - "packages/**"
+      - "apps/browser-harness/**"
+      - "tests/**"
+      - "package.json"
+      - "vitest.config.ts"
+      - ".github/workflows/sdk-ci.yml"
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  validate:
+    name: Test, typecheck, and build SDK workspace
+    runs-on: ubuntu-latest
+    steps:
+      - name: Check out source
+        uses: actions/checkout@v4
+
+      - name: Set up Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: "22"
+
+      - name: Install workspace dependencies
+        run: npm install --no-audit --no-fund --package-lock=false
+
+      - name: Run SDK tests
+        run: npm test
+
+      - name: Type-check SDK and harness
+        run: npm run typecheck
+
+      - name: Build SDK and browser harness
+        run: npm run build
