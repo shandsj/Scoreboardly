@@ -13,9 +13,14 @@ To build and run the project locally, install:
 
 ## Cosmos DB configuration
 
-Create a database called Scoreboardly with the existing Scoreboards container and its `/id` partition key. The isolated-worker migration preserves the existing document serialization shape.
+Create a database called Scoreboardly with these containers:
 
-Configure local.settings.json with COSMOS_DB_CONNECTION_STRING and FUNCTIONS_WORKER_RUNTIME=dotnet-isolated.
+| Container | Partition key | Purpose |
+| --- | --- | --- |
+| Scoreboards | /id | Existing public leaderboard documents |
+| GameCredentials | /id | Salted credential hashes and authorization metadata |
+
+Configure local.settings.json with COSMOS_DB_CONNECTION_STRING and FUNCTIONS_WORKER_RUNTIME=dotnet-isolated. For local token issuance, also configure a development-only SCOREBOARDLY_TOKEN_SIGNING_KEY generated with openssl rand -base64 32. Do not use production secrets in local development.
 
 ## Building and testing
 
@@ -43,7 +48,7 @@ cd Scoreboardly.Application.Functions
 func start
 ~~~
 
-The Functions app uses the .NET 10 isolated worker model. Before deploying, configure the Azure Function App for `FUNCTIONS_WORKER_RUNTIME=dotnet-isolated`, keep `FUNCTIONS_EXTENSION_VERSION=~4`, and verify the hosting plan supports .NET 10. See [Hosting migration](Docs/Hosting-Migration.md).
+See Docs/Scoreboardly-Authentication.md before deploying the isolated-worker app. The Azure Function App must be configured for dotnet-isolated and a supported .NET 10 hosting plan before deployment.
 
 ## Endpoints
 
@@ -51,6 +56,7 @@ The Functions app uses the .NET 10 isolated worker model. Before deploying, conf
 - Get scoreboard by ID: GET /api/scoreboards/:id
 - Create scoreboard: POST /api/scoreboards (Functions key required)
 - Add scoreboard entry: PUT /api/scoreboards/:id
+- Authentication and credential lifecycle: see Docs/Scoreboardly-Authentication.md
 
 ## JavaScript SDK workspace
 
@@ -62,10 +68,20 @@ Run the browser harness with:
 npm run dev:harness
 ~~~
 
-## Current score-write security status
+The SDK accepts a short-lived bearer token through its AuthProvider. A consuming game must implement a same-origin trusted backend endpoint that obtains the token using its own server-side Scoreboardly credential. The game credential and token signing key must never be shipped to browser code.
 
-This hosting migration preserves compatibility: score writes remain anonymous in this PR. Per-game credentials and scoped score-write authorization are handled in the dependent authentication pull request. Do not treat this migration by itself as securing score submissions.
+## Deployment and security status
+
+The .NET service has been migrated to .NET 10 Azure Functions isolated worker. The production deployment workflow is manual until the Azure Function App has been configured for dotnet-isolated. Before dispatching it, preserve FUNCTIONS_EXTENSION_VERSION=~4, create the GameCredentials Cosmos container, and configure the signing key.
+
+For compatibility, SCORE_SUBMISSION_AUTH_REQUIRED defaults to false. Legacy anonymous score writes remain accepted until every active game has a trusted token broker and the setting is explicitly enabled. Do not treat the production score-write endpoint as protected until enforcement is enabled and tested.
+
+Valid access tokens authorize a request, not the legitimacy of the gameplay. Server-side score verification, rate limiting, and replay protection remain separate security work.
 
 ## Contributing
 
 Keep pull requests focused, update documentation with behavior changes, preserve useful comments and rationale, and add tests for changed contracts. See AGENTS.md for repository guidance.
+
+## License
+
+MIT © Jason Shands
