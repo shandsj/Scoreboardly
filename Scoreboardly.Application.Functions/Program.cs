@@ -2,6 +2,7 @@ using Microsoft.Azure.Cosmos;
 using Microsoft.Azure.Functions.Worker;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
+using Scoreboardly.Application.Functions.Auth;
 using Scoreboardly.Application.Functions.Infrastructure;
 
 var host = new HostBuilder()
@@ -16,10 +17,7 @@ var host = new HostBuilder()
 
         services.AddSingleton(_ => new CosmosClient(
             connectionString,
-            new CosmosClientOptions
-            {
-                Serializer = new NewtonsoftJsonCosmosSerializer()
-            }));
+            new CosmosClientOptions { Serializer = new NewtonsoftJsonCosmosSerializer() }));
 
         services.AddSingleton<ScoreboardRepository>();
         services.AddSingleton<GameCredentialRepository>();

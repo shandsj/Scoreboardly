@@ -1,75 +1,87 @@
 # Scoreboardly
-Scoreboardly is a REST API for storing and retrieving high scores in games that runs in Azure using Azure Functions and Cosmos DB.
+
+Scoreboardly is a REST API for storing and retrieving game high scores. It runs in Azure using Azure Functions and Cosmos DB.
 
 ## Prerequisites
-To build and run the project locally, you'll need to install the following prequisites:
-* [Azure Function Core Tools](https://docs.microsoft.com/en-us/azure/azure-functions/functions-run-local?tabs=v4%2Cwindows%2Ccsharp%2Cportal%2Cbash)
-* [dotnet SDK](https://dotnet.microsoft.com/en-us/download)
-* [Cosmos DB Emulator](https://docs.microsoft.com/en-us/azure/cosmos-db/local-emulator?tabs=ssl-netstd21)
 
-### Cosmos DB Emulator Configuration
-* A database called `Scoreboardly` will need to be created.
-* A container called `Scoreboards` will need to be created in the `Scoreboardly` database.
-> `/id` should be used as the parition key.
-* Configure a `local.settings.json` file, and add a `COSMOS_DB_CONNECTION_STRING` property that points to the connection string the Cosmos DB Emulator uses.
+To build and run the project locally, install:
 
-## Building
-To install the required packages, and build, run the following commands:
-```
-dotnet restore
-dotnet build
-```
+- .NET 10 SDK
+- Azure Functions Core Tools v4
+- Node.js 22.12 or newer and npm 10 or newer (for the SDK workspace)
+- Cosmos DB Emulator or an isolated Cosmos DB development account
 
-## Running
-To run the Azure Function locally, run the following command:
-```
-cd Scoreboardly.Applications.Functions
-func start
-```
+## Cosmos DB configuration
 
-## Endpoints
-* [Get All Scoreboards](Docs/GetScoreboards.md) : `GET /api/scoreboards`
-* [Get Scoreboard by ID](Docs/GetScoreboardById.md) : `GET /api/scoreboards/:id`
-* [Create Scoreboard](Docs/CreateScoreboard.md) : `POST /api/scoreboards`
-* [Add Scoreboard Entry](Docs/AddScoreboardEntry.md) : `PUT /api/scoreboards/:id`
+Create a database called Scoreboardly with these containers:
 
-## Contributing
+| Container | Partition key | Purpose |
+| --- | --- | --- |
+| Scoreboards | /id | Existing public leaderboard documents |
+| GameCredentials | /id | Salted credential hashes and authorization metadata |
 
-Feel free to create issues, or submit a PR. Run the `npm run eslint --fix src` command and fix warnings before submitting PRs.
+Configure local.settings.json with COSMOS_DB_CONNECTION_STRING and FUNCTIONS_WORKER_RUNTIME=dotnet-isolated. For local token issuance, also configure a development-only SCOREBOARDLY_TOKEN_SIGNING_KEY generated with openssl rand -base64 32. Do not use production secrets in local development.
 
-## License
+## Building and testing
 
-MIT © Jason Shands
+~~~bash
+dotnet restore Scoreboardly.sln
+dotnet build Scoreboardly.sln --configuration Release
+dotnet test Scoreboardly.sln --configuration Release
+~~~
 
-## JavaScript SDK workspace
+For the JavaScript SDK workspace:
 
-The repository includes a framework-independent TypeScript SDK workspace and a local browser harness. The harness uses the SDK package against a deterministic mock API; it does not contact the production Scoreboardly service.
-
-### Prerequisites
-
-- Node.js 22.12 or newer
-- npm 10 or newer
-
-### Run the tests
-
-```bash
+~~~bash
 npm install
 npm test
 npm run typecheck
 npm run build
-```
+~~~
 
-### SDK documentation
+## Running the Functions app
 
-- [SDK package README](packages/scoreboardly-sdk/README.md): installation, quick start, public API, authentication, and error handling.
-- [SDK and harness guide](Docs/JavaScript-SDK.md): architecture, request flow, mock scenarios, testing, and planned work.
+From the repository root:
 
-### Run the browser harness
+~~~bash
+cd Scoreboardly.Application.Functions
+func start
+~~~
 
-```bash
+See Docs/Scoreboardly-Authentication.md before deploying the isolated-worker app. The Azure Function App must be configured for dotnet-isolated and a supported .NET 10 hosting plan before deployment.
+
+## Endpoints
+
+- Get all scoreboards: GET /api/scoreboards
+- Get scoreboard by ID: GET /api/scoreboards/:id
+- Create scoreboard: POST /api/scoreboards (Functions key required)
+- Add scoreboard entry: PUT /api/scoreboards/:id
+- Authentication and credential lifecycle: see Docs/Scoreboardly-Authentication.md
+
+## JavaScript SDK workspace
+
+The repository includes a framework-independent TypeScript SDK and a local browser harness. The harness uses the SDK package against a deterministic mock API; it does not contact production Scoreboardly.
+
+Run the browser harness with:
+
+~~~bash
 npm run dev:harness
-```
+~~~
 
-Open the local URL printed by Vite. The scenario controls simulate API availability, latency, token failures, board/scope mismatches, and score-submission outcomes. The token exchange in this harness is entirely mocked. It does not provision credentials or issue real Scoreboardly tokens.
+The SDK accepts a short-lived bearer token through its AuthProvider. A consuming game must implement a same-origin trusted backend endpoint that obtains the token using its own server-side Scoreboardly credential. The game credential and token signing key must never be shipped to browser code.
 
-The workspace intentionally starts with a thin public client contract and injectable authentication provider. Production credential provisioning, signed token issuance/validation, caching, idempotency, and offline queue behavior are tracked in separate issues.
+## Deployment and security status
+
+The .NET service has been migrated to .NET 10 Azure Functions isolated worker. The production deployment workflow is manual until the Azure Function App has been configured for dotnet-isolated. Before dispatching it, preserve FUNCTIONS_EXTENSION_VERSION=~4, create the GameCredentials Cosmos container, and configure the signing key.
+
+For compatibility, SCORE_SUBMISSION_AUTH_REQUIRED defaults to false. Legacy anonymous score writes remain accepted until every active game has a trusted token broker and the setting is explicitly enabled. Do not treat the production score-write endpoint as protected until enforcement is enabled and tested.
+
+Valid access tokens authorize a request, not the legitimacy of the gameplay. Server-side score verification, rate limiting, and replay protection remain separate security work.
+
+## Contributing
+
+Keep pull requests focused, update documentation with behavior changes, preserve useful comments and rationale, and add tests for changed contracts. See AGENTS.md for repository guidance.
+
+## License
+
+MIT © Jason Shands

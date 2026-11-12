@@ -1,0 +1,12 @@
+{
+  "IsEncrypted": false,
+  "Values": {
+    "AzureWebJobsStorage": "UseDevelopmentStorage=true",
+    "FUNCTIONS_WORKER_RUNTIME": "dotnet-isolated",
+    "COSMOS_DB_CONNECTION_STRING": "<local-cosmos-db-connection-string>",
+    "SCOREBOARDLY_TOKEN_SIGNING_KEY": "<base64-encoded-random-32-byte-key>",
+    "SCOREBOARDLY_TOKEN_ISSUER": "scoreboardly-local",
+    "SCOREBOARDLY_TOKEN_AUDIENCE": "scoreboardly-api-local",
+    "SCORE_SUBMISSION_AUTH_REQUIRED": "false"
+  }
+}
