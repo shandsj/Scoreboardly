@@ -1,75 +1,71 @@
 # Scoreboardly
-Scoreboardly is a REST API for storing and retrieving high scores in games that runs in Azure using Azure Functions and Cosmos DB.
+
+Scoreboardly is a REST API for storing and retrieving game high scores. It runs in Azure using Azure Functions and Cosmos DB.
 
 ## Prerequisites
-To build and run the project locally, you'll need to install the following prequisites:
-* [Azure Function Core Tools](https://docs.microsoft.com/en-us/azure/azure-functions/functions-run-local?tabs=v4%2Cwindows%2Ccsharp%2Cportal%2Cbash)
-* [dotnet SDK](https://dotnet.microsoft.com/en-us/download)
-* [Cosmos DB Emulator](https://docs.microsoft.com/en-us/azure/cosmos-db/local-emulator?tabs=ssl-netstd21)
 
-### Cosmos DB Emulator Configuration
-* A database called `Scoreboardly` will need to be created.
-* A container called `Scoreboards` will need to be created in the `Scoreboardly` database.
-> `/id` should be used as the parition key.
-* Configure a `local.settings.json` file, and add a `COSMOS_DB_CONNECTION_STRING` property that points to the connection string the Cosmos DB Emulator uses.
+To build and run the project locally, install:
 
-## Building
-To install the required packages, and build, run the following commands:
-```
-dotnet restore
-dotnet build
-```
+- .NET 10 SDK
+- Azure Functions Core Tools v4
+- Node.js 22.12 or newer and npm 10 or newer (for the SDK workspace)
+- Cosmos DB Emulator or an isolated Cosmos DB development account
 
-## Running
-To run the Azure Function locally, run the following command:
-```
-cd Scoreboardly.Applications.Functions
-func start
-```
+## Cosmos DB configuration
 
-## Endpoints
-* [Get All Scoreboards](Docs/GetScoreboards.md) : `GET /api/scoreboards`
-* [Get Scoreboard by ID](Docs/GetScoreboardById.md) : `GET /api/scoreboards/:id`
-* [Create Scoreboard](Docs/CreateScoreboard.md) : `POST /api/scoreboards`
-* [Add Scoreboard Entry](Docs/AddScoreboardEntry.md) : `PUT /api/scoreboards/:id`
+Create a database called Scoreboardly with the existing Scoreboards container and its `/id` partition key. The isolated-worker migration preserves the existing document serialization shape.
 
-## Contributing
+Configure local.settings.json with COSMOS_DB_CONNECTION_STRING and FUNCTIONS_WORKER_RUNTIME=dotnet-isolated.
 
-Feel free to create issues, or submit a PR. Run the `npm run eslint --fix src` command and fix warnings before submitting PRs.
+## Building and testing
 
-## License
+~~~bash
+dotnet restore Scoreboardly.sln
+dotnet build Scoreboardly.sln --configuration Release
+dotnet test Scoreboardly.sln --configuration Release
+~~~
 
-MIT © Jason Shands
+For the JavaScript SDK workspace:
 
-## JavaScript SDK workspace
-
-The repository includes a framework-independent TypeScript SDK workspace and a local browser harness. The harness uses the SDK package against a deterministic mock API; it does not contact the production Scoreboardly service.
-
-### Prerequisites
-
-- Node.js 22.12 or newer
-- npm 10 or newer
-
-### Run the tests
-
-```bash
+~~~bash
 npm install
 npm test
 npm run typecheck
 npm run build
-```
+~~~
 
-### SDK documentation
+## Running the Functions app
 
-- [SDK package README](packages/scoreboardly-sdk/README.md): installation, quick start, public API, authentication, and error handling.
-- [SDK and harness guide](Docs/JavaScript-SDK.md): architecture, request flow, mock scenarios, testing, and planned work.
+From the repository root:
 
-### Run the browser harness
+~~~bash
+cd Scoreboardly.Application.Functions
+func start
+~~~
 
-```bash
+The Functions app uses the .NET 10 isolated worker model. Before deploying, configure the Azure Function App for `FUNCTIONS_WORKER_RUNTIME=dotnet-isolated`, keep `FUNCTIONS_EXTENSION_VERSION=~4`, and verify the hosting plan supports .NET 10. See [Hosting migration](Docs/Hosting-Migration.md).
+
+## Endpoints
+
+- Get all scoreboards: GET /api/scoreboards
+- Get scoreboard by ID: GET /api/scoreboards/:id
+- Create scoreboard: POST /api/scoreboards (Functions key required)
+- Add scoreboard entry: PUT /api/scoreboards/:id
+
+## JavaScript SDK workspace
+
+The repository includes a framework-independent TypeScript SDK and a local browser harness. The harness uses the SDK package against a deterministic mock API; it does not contact production Scoreboardly.
+
+Run the browser harness with:
+
+~~~bash
 npm run dev:harness
-```
+~~~
 
-Open the local URL printed by Vite. The scenario controls simulate API availability, latency, token failures, board/scope mismatches, and score-submission outcomes. The token exchange in this harness is entirely mocked. It does not provision credentials or issue real Scoreboardly tokens.
+## Current score-write security status
 
-The workspace intentionally starts with a thin public client contract and injectable authentication provider. Production credential provisioning, signed token issuance/validation, caching, idempotency, and offline queue behavior are tracked in separate issues.
+This hosting migration preserves compatibility: score writes remain anonymous in this PR. Per-game credentials and scoped score-write authorization are handled in the dependent authentication pull request. Do not treat this migration by itself as securing score submissions.
+
+## Contributing
+
+Keep pull requests focused, update documentation with behavior changes, preserve useful comments and rationale, and add tests for changed contracts. See AGENTS.md for repository guidance.
