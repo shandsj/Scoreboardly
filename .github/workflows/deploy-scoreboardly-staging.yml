@@ -1,0 +1,87 @@
+name: Deploy Scoreboardly staging
+
+on:
+  workflow_dispatch:
+
+permissions:
+  contents: read
+  id-token: write
+
+concurrency:
+  group: scoreboardly-staging
+  cancel-in-progress: false
+
+jobs:
+  deploy:
+    # This workflow is deliberately limited to the isolated-worker migration branch.
+    if: github.ref == 'refs/heads/feature/dotnet10-isolated-migration'
+    runs-on: ubuntu-latest
+    environment: staging
+    steps:
+      - name: Check out source
+        uses: actions/checkout@v4
+
+      - name: Set up .NET 10
+        uses: actions/setup-dotnet@v4
+        with:
+          dotnet-version: 10.0.x
+
+      - name: Restore solution
+        run: dotnet restore Scoreboardly.sln
+
+      - name: Run tests
+        run: dotnet test Scoreboardly.sln --configuration Release --no-restore
+
+      - name: Publish Azure Functions app
+        run: dotnet publish Scoreboardly.Application.Functions/Scoreboardly.Application.Functions.csproj --configuration Release --no-restore --output ./publish
+
+      - name: Sign in to Azure with GitHub OIDC
+        uses: azure/login@v2
+        with:
+          client-id: ${{ secrets.AZURE_CLIENT_ID }}
+          tenant-id: ${{ secrets.AZURE_TENANT_ID }}
+          subscription-id: ${{ secrets.AZURE_SUBSCRIPTION_ID }}
+
+      - name: Deploy to the staging Function App
+        uses: Azure/functions-action@v1
+        with:
+          app-name: ${{ vars.SCOREBOARDLY_STAGING_APP_NAME }}
+          package: ./publish
+
+      - name: Smoke-test staging API
+        env:
+          APP_NAME: ${{ vars.SCOREBOARDLY_STAGING_APP_NAME }}
+          FUNCTION_KEY: ${{ secrets.SCOREBOARDLY_STAGING_FUNCTION_KEY }}
+        shell: bash
+        run: |
+          set -euo pipefail
+
+          if [[ -z "${APP_NAME}" || -z "${FUNCTION_KEY}" ]]; then
+            echo "::error::Configure SCOREBOARDLY_STAGING_APP_NAME and SCOREBOARDLY_STAGING_FUNCTION_KEY in the staging environment."
+            exit 1
+          fi
+
+          base_url="https://${APP_NAME}.azurewebsites.net/api"
+          board_id="$(uuidgen)"
+          create_payload="$(printf '{"scoreboardId":"%s","name":"Staging smoke test","maximumScores":10}' "${board_id}")"
+
+          echo "Creating an isolated staging test board..."
+          curl --fail-with-body --silent --show-error \
+            --request POST "${base_url}/scoreboards?code=${FUNCTION_KEY}" \
+            --header 'Content-Type: application/json' \
+            --data "${create_payload}" \
+            --output /dev/null
+
+          echo "Reading the newly created staging board..."
+          curl --fail-with-body --silent --show-error \
+            "${base_url}/scoreboards/${board_id}" \
+            --output /dev/null
+
+          echo "Submitting a score to the staging board..."
+          curl --fail-with-body --silent --show-error \
+            --request PUT "${base_url}/scoreboards/${board_id}" \
+            --header 'Content-Type: application/json' \
+            --data '{"playerName":"GitHub Actions staging smoke test","score":12345}' \
+            --output /dev/null
+
+          echo "Staging deployment and API smoke tests succeeded."

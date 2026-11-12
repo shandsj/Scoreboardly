@@ -1,0 +1,33 @@
+name: .NET service CI
+
+on:
+  pull_request:
+    branches: [main, feature/dotnet10-isolated-migration]
+  push:
+    branches: [main]
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  validate:
+    name: Restore, test, and publish Azure Functions service
+    runs-on: ubuntu-latest
+    steps:
+      - name: Check out source
+        uses: actions/checkout@v4
+
+      - name: Set up .NET 10
+        uses: actions/setup-dotnet@v4
+        with:
+          dotnet-version: 10.0.x
+
+      - name: Restore solution
+        run: dotnet restore Scoreboardly.sln
+
+      - name: Run .NET tests
+        run: dotnet test Scoreboardly.sln --configuration Release --no-restore
+
+      - name: Publish isolated Azure Functions app
+        run: dotnet publish Scoreboardly.Application.Functions/Scoreboardly.Application.Functions.csproj --configuration Release --no-restore --output ./publish
