@@ -35,17 +35,27 @@ In **Settings → Environments**, create an environment named `staging`. Add the
 
 ### Secrets
 
-- `AZURE_FUNCTIONAPP_PUBLISH_PROFILE`: publish profile downloaded from the staging Function App only.
+- `AZURE_CLIENT_ID`: client ID of the Azure app registration or user-assigned managed identity used for GitHub OIDC.
+- `AZURE_TENANT_ID`: Azure tenant ID.
+- `AZURE_SUBSCRIPTION_ID`: subscription ID containing the staging resources.
 - `SCOREBOARDLY_STAGING_FUNCTION_KEY`: a function key (or host key) for the staging app, used only by the staging smoke test to create a disposable test board.
 
-Protect the environment with required reviewers if desired. Do not reuse the production publish profile or production Function key.
+Configure a federated identity credential on the Azure identity with:
+
+- Issuer: `https://token.actions.githubusercontent.com`
+- Audience: `api://AzureADTokenExchange`
+- Subject: `repo:shandsj/Scoreboardly:environment:staging`
+
+Grant that identity only the permissions needed to deploy to the staging Function App. For Flex Consumption, also grant the required data-plane access to the staging deployment storage. Scope permissions to the staging resources or resource group, not production.
+
+Protect the environment with required reviewers if desired. Never reuse production Azure identities or production Function keys.
 
 ## Deploy
 
 1. Push/merge the staging workflow and run PR #20 CI first.
 2. In GitHub Actions, select **Deploy Scoreboardly staging**.
 3. Select branch `feature/dotnet10-isolated-migration` and run the workflow.
-4. The workflow restores, tests, publishes, deploys, then performs API smoke tests. It creates a disposable board named `Staging smoke test` and submits one test score.
+4. The workflow restores, tests, publishes, signs in through GitHub OIDC, deploys, then performs API smoke tests. It creates a disposable board named `Staging smoke test` and submits one test score.
 5. Review the workflow result and the staging Function App's Application Insights logs.
 
 The workflow is manual-only and refuses to deploy when run from any branch other than `feature/dotnet10-isolated-migration`.
